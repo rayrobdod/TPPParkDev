@@ -329,7 +329,7 @@
 		overflow-y: scroll;
 		
 		// Internal tags
-		index, pokemon, trainer, event {
+		index, pokemon, trainer, event, community {
 			display: block;
 		}
 		
@@ -344,6 +344,33 @@
 			
 		}
 		
+		trainer tab.trainer-info {
+			
+			* {
+				display:block;
+				&:before {
+					display:inline-block;
+					background-color: lighten(@infodexred, 10%);
+					border: 2px inset @infodexred;
+					min-width: 20ex;
+					margin-right: 1ex;
+				}
+			}
+			
+			img {float:right; border: 0px solid black;}
+			nick {display:inline-block;}
+			nick:before { content: "Nickname"; }
+			idnum {float:right; width: 13ex;}
+			idnum:before {content: "ID"; min-width:3ex;}
+			playtime:before {content: "Play Time"; }
+			pokedex:before {content: "Pokédex"; }
+			pokedex:after {content: "Owned: " attr(own) " / Seen: " attr(seen);}
+			released:before {content: "Released";}
+			released:after {content: attr(count);}
+			e4:before {content: "Elite Four Attempts";}
+			e4:after {content: attr(attempts);}
+			blackouts:before {content: "Blackouts";}
+		}
 		
 	}
 }
