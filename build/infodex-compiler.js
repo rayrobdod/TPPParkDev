@@ -3,9 +3,11 @@
 
 var fs = require("fs");
 var path = require("path");
+var sync = require("synchronize");
+var archiver = require("archiver");
 var mkdirp = require("mkdirp").sync;
 
-const TEMP_DEX = BUILD_TEMP+"_infodex_";
+const TEMP_DEX = BUILD_TEMP+"_infodex_/";
 
 var finaldex = {};
 
@@ -18,13 +20,50 @@ function compileInfodex() {
 	collateGlobalEntries();
 	generateIndexes();
 	
-	//zipWorkingDirectory(); TODO
+	zipWorkingDirectory();
 	
 	outputReport();
 }
 module.exports = compileInfodex;
 
 function collateLocalEntries() {
+	var files = 0;
+	//TODO
+	
+	console.log("[InfoD] Collated "+files+" local Infodex entries.");
+	nextTick();
+}
+
+function collateGlobalEntries() {
+	var files = 0;
+	
+	function _processDir(src) {
+		var dirListing = fs.readdirSync(src);
+		for (var di = 0; di < dirListing.length; di++) {
+			var file = dirListing[di];
+			
+			var stat = fs.statSync(src+file);
+			if (stat.isFile()) {
+				if ("infodex.html" == file) {
+					copyInfodexEntry(src+file);
+					files++;
+				} else {
+					// not a file we care about; do nothing
+				}
+			} else {
+				_processDir(src+file+"/");
+			}
+			nextTick();
+		}
+	}
+	
+	EVENT_DIRS.forEach(_processDir);
+	
+	console.log("[InfoD] Collated "+files+" global Infodex entries.");
+	nextTick();
+}
+
+function generateIndexes() {
 	_processDir(INFODEX_DIR);
 	
 	var files = 0;
@@ -45,20 +84,6 @@ function collateLocalEntries() {
 		}
 	}
 	
-	console.log("[InfoD] Collated "+files+" local Infodex entries.");
-	nextTick();
-}
-
-function collateGlobalEntries() {
-	var files = 0;
-	//TODO
-	console.log("[InfoD] Collated "+files+" global Infodex entries.");
-	nextTick();
-}
-
-function generateIndexes() {
-	var files = 0;
-	//TODO
 	console.log("[InfoD] Generated "+files+" index pages.");
 	nextTick();
 }
@@ -77,7 +102,7 @@ function copyInfodexEntry(src) {
 		attrs: {},
 	};
 	
-	var res = /<(index|pokemon|event|trainer)([^>]+)>/i.exec(entry);
+	var res = /<(index|pokemon|event|trainer|community)([^>]+)>/i.exec(entry);
 	if (!res) {
 		throw new Error("Infodex Entry "+src+" is invalid!");
 	}
@@ -109,10 +134,10 @@ function copyInfodexEntry(src) {
 		meta.contents = entry;
 	} else {
 		// Write out the file now in its requested location
-		var path = meta.id.replace(".", "/");
+		var path = meta.id.replace(/\./g, "/");
 		path += ".html";
 		
-		var dir = path.dirname(path);
+		var dir = TEMP_DEX+path.substring(0, path.lastIndexOf("/")+1);
 		if (!fs.existsSync(dir)) {
 			mkdirp(dir);
 		}
@@ -160,11 +185,10 @@ function zipWorkingDirectory(id) {
 	outstr.on("finish", sync.defer());
 	arch.pipe(outstr);
 	arch.bulk([
-		{ expand: true, cwd: BUILD_TEMP+id, src: ["**"], flatten: false, },
-		//{ expand: true, cwd: 'source', src: ["**"], dest: 'source' },
+		{ expand: true, cwd: TEMP_DEX, src: ["**"], flatten: false, },
 	]);
 	arch.finalize();
 	
 	sync.await();
-	console.log("[cMaps] Zipped file:", "maps/"+id+".zip", "["+arch.pointer()+" bytes]");
+	console.log("[cMaps] Zipped file:", "/infodex.zip", "["+arch.pointer()+" bytes]");
 }
