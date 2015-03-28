@@ -20,6 +20,7 @@ $(function(){
 
 window.SoundManager = require("./managers/soundmanager");
 window.MapManager = require("./managers/mapmanager");
+window.Infodex = require("./managers/infodex");
 window.ActorScheduler = require("./managers/actorscheduler");
 window.GC = require("./managers/garbage-collector");
 window.UI = require("./managers/ui-manager");
