@@ -17,6 +17,7 @@ $(function(){
 	// currentMap = new Map("iChurchOfHelix");
 	// currentMap.load();
 	MapManager.transitionTo();
+	Infodex.openPage("game.crystal.trainer.ajdowns");
 	
 	renderLoop.start({
 		clearColor : 0xFF0000,

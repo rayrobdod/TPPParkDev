@@ -53,7 +53,6 @@ extend(Infodex.prototype, {
 			if (xhr.status == 200) {
 				self.file = xhr.response;
 				self.fileSys.importBlob(self.file, function success(){
-					console.log("downloaded");
 					self.emit("downloaded");
 				}, function error(e){
 					console.error("ERROR: ", e);
@@ -91,10 +90,8 @@ extend(Infodex.prototype, {
 				self.openPage(id);
 			});
 			this.download();
-			console.log("DOWNLOADING INSTEAD");
 			return;
 		}
-		console.log("ALREAD HAS THINGY");
 		this.fileSys.find(id.replace(/\./g, "/") + ".html").getText(__pageLoaded, __logProgress);
 		
 		function __logProgress() {
