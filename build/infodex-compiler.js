@@ -124,7 +124,7 @@ function copyInfodexEntry(src) {
 		}
 		console.log("META = ", meta.type, meta.id, meta.name); sleep(500);
 	}
-	if (!meta.type || !meta.id) {
+	if ((typeof meta.type === "undefined") || (typeof meta.id === "undefined")) {
 		console.log("Infodex Entry "+src+" is malformed! Skipping!");
 		return;
 	}
@@ -163,8 +163,12 @@ function copyInfodexEntry(src) {
 		var lastid = id[id.length-1];
 		
 		if (meta.type == "index") {
-			dex[lastid] = {};
-			dex[lastid]._index = meta;
+			if (lastid == "") {
+				dex._index = meta;
+			} else {
+				dex[lastid] = {};
+				dex[lastid]._index = meta;
+			}
 		} else {
 			dex[lastid] = meta;
 		}
@@ -190,5 +194,5 @@ function zipWorkingDirectory(id) {
 	arch.finalize();
 	
 	sync.await();
-	console.log("[cMaps] Zipped file:", "/infodex.zip", "["+arch.pointer()+" bytes]");
+	console.log("[InfoD] Zipped file:", "/infodex.zip", "["+arch.pointer()+" bytes]");
 }
