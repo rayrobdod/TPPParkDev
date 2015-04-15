@@ -4,6 +4,7 @@
 
 var inherits = require("inherits");
 var extend = require("extend");
+var EventEmitter = require("events").EventEmitter;
 
 function Infodex() {
 	var self = this;
@@ -27,6 +28,7 @@ function Infodex() {
 	this.history_fwd = [];
 	this.fileSys = new zip.fs.FS();
 }
+inherits(Infodex, EventEmitter);
 extend(Infodex.prototype, {
 	history_back: null,
 	history_fwd: null,
@@ -50,7 +52,12 @@ extend(Infodex.prototype, {
 			// console.log("LOAD:", e);
 			if (xhr.status == 200) {
 				self.file = xhr.response;
-				self.fileSys.importBlob(self.file);
+				self.fileSys.importBlob(self.file, function success(){
+					console.log("downloaded");
+					self.emit("downloaded");
+				}, function error(e){
+					console.error("ERROR: ", e);
+				});
 			} else {
 				console.error("ERROR:", xhr.statusText);
 				self.loadError = xhr.statusText;
@@ -79,6 +86,15 @@ extend(Infodex.prototype, {
 	
 	openPage: function(id) {
 		var self = this;
+		if (this.file === null) {
+			this.once("downloaded", function(){
+				self.openPage(id);
+			});
+			this.download();
+			console.log("DOWNLOADING INSTEAD");
+			return;
+		}
+		console.log("ALREAD HAS THINGY");
 		this.fileSys.find(id.replace(/\./g, "/") + ".html").getText(__pageLoaded, __logProgress);
 		
 		function __logProgress() {
@@ -97,5 +113,6 @@ extend(Infodex.prototype, {
 		}
 	},
 });
+
 module.exports = new Infodex();
 
